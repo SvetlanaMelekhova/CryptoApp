@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 import java.nio.MappedByteBuffer
 import javax.inject.Inject
 
-class RefreshDataWorker @Inject constructor(
+class RefreshDataWorker (
     context: Context,
     workerParameters: WorkerParameters,
     private val coinInfoDao: CoinInfoDao,
@@ -41,6 +41,26 @@ class RefreshDataWorker @Inject constructor(
         fun makeRequest(): OneTimeWorkRequest {
             return OneTimeWorkRequestBuilder<RefreshDataWorker>()
                 .build()
+        }
+    }
+
+    class Factory @Inject constructor(
+        private val coinInfoDao: CoinInfoDao,
+        private val apiService: ApiService,
+        private val mapper: CoinMapper
+    ): ChildWorkerFactory{
+
+        override fun create(
+            context: Context,
+            workerParameters: WorkerParameters
+        ): ListenableWorker {
+            return RefreshDataWorker(
+                context,
+                workerParameters,
+                coinInfoDao,
+                apiService,
+                mapper
+            )
         }
     }
 }
