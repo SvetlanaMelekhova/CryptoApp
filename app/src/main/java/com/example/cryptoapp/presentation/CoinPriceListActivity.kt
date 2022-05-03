@@ -1,14 +1,18 @@
 package com.example.cryptoapp.presentation
 
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.cryptoapp.App
 import com.example.cryptoapp.R
+import com.example.cryptoapp.data.provider.ShopItem
 import com.example.cryptoapp.databinding.ActivityCoinPrceListBinding
 import com.example.cryptoapp.domain.CoinInfo
 import com.example.cryptoapp.presentation.adapters.CoinInfoAdapter
 import javax.inject.Inject
+import kotlin.concurrent.thread
 
 class CoinPriceListActivity : AppCompatActivity() {
 
@@ -28,6 +32,7 @@ class CoinPriceListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         component.inject(this)
         super.onCreate(savedInstanceState)
+        getDataFromContentProvider()
         setContentView(binding.root)
         val adapter = CoinInfoAdapter(this)
         adapter.onCoinClickListener = object : CoinInfoAdapter.OnCoinClickListener {
@@ -64,5 +69,33 @@ class CoinPriceListActivity : AppCompatActivity() {
             .replace(R.id.fragment_container, CoinDetailFragment.newInstance(fromSymbol))
             .addToBackStack(null)
             .commit()
+    }
+
+
+    private fun getDataFromContentProvider() {
+        thread {
+            val cursor = contentResolver.query(
+                Uri.parse("content://com.svetlana.learn.androidproffcourse/shop_items"),
+                null,
+                null,
+                null,
+                null
+            )
+
+            while (cursor?.moveToNext() == true) {
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+                val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
+                val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
+                val enabled = cursor.getInt(cursor.getColumnIndexOrThrow("enabled")) > 0
+                val shopItem = ShopItem(
+                    id = id,
+                    name = name,
+                    count = count,
+                    enabled = enabled
+                )
+                Log.d("contentResolver", "Cursor: ${shopItem}")
+            }
+            cursor?.close()
+        }
     }
 }

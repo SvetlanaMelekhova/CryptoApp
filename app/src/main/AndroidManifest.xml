@@ -29,5 +29,8 @@
             tools:replace="android:authorities"
             tools:node="remove"/>
     </application>
+    <queries>
+        <provider android:authorities="com.svetlana.learn.androidproffcourse"/>
+    </queries>
 
 </manifest>
